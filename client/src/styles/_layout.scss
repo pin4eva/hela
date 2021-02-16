@@ -1,0 +1,9 @@
+#front-layout {
+  display: flex;
+  flex-direction: column;
+  // height: inherit;
+  height: 100%;
+  .main-page {
+    flex: 1;
+  }
+}
