@@ -9,7 +9,8 @@ import { authentication } from "../utils/auth";
 import { RepComment } from "../models/ReportModel";
 import User from "../models/UserModel";
 import sgMail from "@sendgrid/mail";
-import { IUser } from "src/types/User.type";
+import { IUser } from "../types/User.type";
+import { cloudinaryUpload } from "../utils/cloudinary";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -111,7 +112,7 @@ export default {
     login: async (
       _,
       { email, password },
-      { res }
+      { res, req }
     ): Promise<{ user: IUser; token: any }> => {
       if (!email || !password) throw new Error("Fill the email and password");
       const user = await User.findOne({ email });
@@ -131,6 +132,9 @@ export default {
           httpOnly: process.env.NODE_ENV === " production ",
           secure: process.env.NODE_ENV === " production ",
         });
+        // req.session = {
+        //   auth: token,
+        // };
 
         return { user, token };
       } catch (error) {
@@ -248,6 +252,24 @@ export default {
             new: true,
           }
         );
+        return user;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    uploadImage: async (_, { image }, { token }) => {
+      const authUser = await authentication(token);
+      const img = await cloudinaryUpload(image);
+
+      try {
+        const user = await User.findByIdAndUpdate(
+          authUser.id,
+          { $set: { image: img } },
+          { new: true }
+        );
+
+        // user = await User.findOne({ _id });
+
         return user;
       } catch (error) {
         throw new Error(error);

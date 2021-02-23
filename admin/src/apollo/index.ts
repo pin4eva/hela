@@ -1,0 +1,19 @@
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import cookies from "js-cookie";
+
+export const HTTP_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://..."
+    : "http://localhost:8000";
+export const TOKEN_NAME = "token";
+
+const client = new ApolloClient({
+  uri: `${HTTP_URL}/api/graphql`,
+  cache: new InMemoryCache(),
+  credentials: "include",
+  headers: {
+    authorization: cookies.get(TOKEN_NAME) || "",
+  },
+});
+
+export default client;

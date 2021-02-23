@@ -6,12 +6,13 @@ import {
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { compiler } from "markdown-to-jsx";
+import { AnyARecord } from "node:dns";
 import PropTypes from "prop-types";
-import React, { useState, SyntheticEvent } from "react";
+import React, { useState } from "react";
 import ReactMde from "react-mde";
 import { Loader, Notification } from "rsuite";
 import styled from "styled-components";
-import { ReportInterface } from "types/Report.type";
+import { IReport } from "types/Report.type";
 import { APPEAL_COURT, SUPREME_COURT } from "utils/constants";
 import { volumes } from "utils/reportUtils";
 
@@ -19,7 +20,7 @@ dayjs.extend(utc);
 
 interface IPage {
   slug: string;
-  onUpdate(data): void;
+  onUpdate(data: any): void;
   onCancel(): void;
 }
 
@@ -41,7 +42,7 @@ const UpdateReportsComp = ({
   const [updateReport, { loading: updating }] = useMutation(
     UPDATE_REPORT_MUTATION
   );
-  const [info, setInfo] = useState<ReportInterface | any>();
+  const [info, setInfo] = useState<IReport | any>();
 
   const notify = (funcName: string, title: string, content: string) => {
     Notification[funcName]({
@@ -50,7 +51,7 @@ const UpdateReportsComp = ({
     });
   };
 
-  const handleChange = (e: SyntheticEvent) => {
+  const handleChange = (e: { target: { value: any; name: any } }) => {
     const { value, name } = e.target;
 
     setInfo({
@@ -112,7 +113,7 @@ const UpdateReportsComp = ({
               className="form-control"
               aria-label="Select Volume"
               name="vol"
-              value={info.vol}
+              value={info?.vol}
               onChange={handleChange}
             >
               <option value=""></option>
@@ -127,7 +128,7 @@ const UpdateReportsComp = ({
             <input
               type="text"
               className="form-conrol"
-              value={info.title}
+              value={info?.title}
               name="title"
               onChange={handleChange}
             />
@@ -137,7 +138,7 @@ const UpdateReportsComp = ({
             <input
               type="date"
               className="form-conrol"
-              value={dayjs(info.date).format()}
+              value={dayjs(info?.date).format()}
               name="date"
               onChange={handleChange}
             />
@@ -146,7 +147,7 @@ const UpdateReportsComp = ({
           <div className="form-group">
             <label>Summary</label>
             <ReactMde
-              value={info.summary}
+              value={info?.summary}
               onChange={(e) => setInfo({ ...info, summary: e })}
               selectedTab={selectedTab}
               onTabChange={setSelectedTab}
@@ -159,7 +160,7 @@ const UpdateReportsComp = ({
           <div className="form-group">
             <label>Judgement</label>
             <ReactMde
-              value={info.body}
+              value={info?.body}
               onChange={(e) => setInfo({ ...info, body: e })}
               selectedTab={selectedTab}
               onTabChange={setSelectedTab}

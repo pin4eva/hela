@@ -4,9 +4,8 @@ import FrontLayout from "layouts/FrontLayout";
 import BannerCarousel from "components/BannerCarousel";
 import Link from "next/link";
 import PricingComp from "components/Pricing";
-// import Image from "next/image";
 
-const HomePage = () => {
+const HomePage = (): JSX.Element => {
   return (
     <Fragment>
       <FrontLayout>

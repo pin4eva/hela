@@ -28,7 +28,17 @@ const UserSchema = new Schema(
     bio: { type: String, default: "" },
     image: { type: String, default: "http://placehold.jp/150x150.png" },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id;
+        delete ret.password;
+        delete ret.__v;
+        delete ret._id;
+      },
+    },
+  }
 );
 
 // export default mongoose.models?.User || mongoose.model("User", UserSchema);

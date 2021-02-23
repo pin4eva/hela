@@ -2,7 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button, Modal } from "rsuite";
 
-const ModalComp = (props) => {
+interface IPage {
+  onClose(): void;
+  show: boolean;
+  children: React.ReactNode;
+}
+
+const ModalComp = (props: IPage): JSX.Element => {
   return (
     <div>
       <Modal show={props.show} onHide={props.onClose}>

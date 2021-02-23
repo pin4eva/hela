@@ -4,6 +4,9 @@ $grid-count: 2 3 4 5 6;
   cursor: pointer;
   @include transition();
 }
+.f-thin {
+  font-weight: 200;
+}
 
 .thin {
   font-weight: thin;

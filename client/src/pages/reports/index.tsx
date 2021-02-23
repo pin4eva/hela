@@ -1,101 +1,92 @@
-import { useLazyQuery } from "@apollo/client";
-import { GET_LIMITED_REPORTS } from "apollo/queries/reportQuery";
+import { gql, useLazyQuery } from "@apollo/client";
+import { initializeApollo } from "apollo";
 import HeaderBannerComp from "components/HeaderBanner";
 import SearchReportComp from "components/reports/SearchReport";
 import FrontLayout from "layouts/FrontLayout";
+import { NextPage, NextPageContext } from "next";
 import Link from "next/link";
 import React, { Fragment, useEffect, useState } from "react";
 import { Loader } from "rsuite";
 import styled from "styled-components";
-import { ReportInterface } from "types/Report.type";
+import { IReport } from "types/Report.type";
 import { APPEAL_COURT, SUPREME_COURT } from "utils/constants";
 
-const ReportsListPage = (): JSX.Element => {
+const GET_REPORTS = gql`
+  query($search: String, $limit: Int, $skip: Int) {
+    getReports(search: $search, limit: $limit, skip: $skip) {
+      _id
+      title
+      slug
+      caseRef
+      court
+      summary
+    }
+  }
+`;
+
+const ReportsListPage: NextPage<{ allReports: IReport[] | null }> = ({
+  allReports,
+}: {
+  allReports: IReport[];
+}): JSX.Element => {
   const [activeTab, setActiveTab] = useState("All");
   // const [count, setCount] = useState(0);
-  const [reports, setReports] = useState<ReportInterface[]>([]);
-  const [getReports, { loading, data }] = useLazyQuery(GET_LIMITED_REPORTS, {
-    onCompleted: (data) => setReports(data.getLimitedReports),
+  const [reports, setReports] = useState<IReport[]>([]);
+  const [getReports, { loading }] = useLazyQuery(GET_REPORTS, {
+    onCompleted: (data) => setReports(data.getReports),
     onError: (err) => console.log(err),
   });
 
-  useEffect(() => {
-    const getReport = async () => {
-      await getReports({ variables: { skip: 0, limit: 5 } });
-    };
-    getReport();
-  }, []);
-
-  useEffect(() => {
-    if (activeTab !== "All") {
-      setReports(
-        data?.getLimitedReports.filter(
-          (rep: ReportInterface) => rep.court === activeTab
-        )
-      );
-    }
-
-    return () => setReports(data?.getLimitedReports);
-  }, [activeTab]);
-
-  const handleResults = (data: any) => {
-    setReports(data);
+  const handleSwitch = (tab: string) => {
+    console.log(tab);
+    // setActiveTab(tab);
+    // setReports(reports.filter((report) => report.court === tab));
   };
 
-  // if (loading) return <Spinner />;
+  useEffect(() => {
+    if (allReports) {
+      setReports(allReports);
+    }
+  }, []);
+
+  if (!allReports) return <Loader content="Getting Reports" />;
   return (
     <FrontLayout>
       <HeaderBannerComp image="/images/reports-banner.png" />
       <Wrapper>
         <div className="reports">
           <div className="container">
-            <SearchReportComp getResults={handleResults} />
-            {loading ? (
-              <Loader content="Loading..." />
-            ) : (
-              <Fragment>
-                <div className="reports-tab mt-4">
-                  <ul className="nav nav-tabs">
-                    {tabList.map((tab, i) => (
-                      <li className="nav-item" key={i}>
-                        <a
-                          className={`nav-link c-hand ${
-                            activeTab === tab ? "active" : ""
-                          }`}
-                          onClick={() => setActiveTab(tab)}
-                        >
-                          {tab}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="reports-map">
-                  {reports?.map((report, i) => (
-                    <div className="wrapper my-3 " key={i}>
-                      <div className="wrapper-header">
-                        <Link href={`/reports/${report.slug}`}>
-                          <h6 className="mt-3 mb-0 c-hand hover-primary">
-                            {report.title}
-                          </h6>
-                        </Link>
-                        <div className="small font-italic d-flex justify-content-between mb-3">
-                          <small className="text-uppercase">
-                            {report.court}
-                          </small>
-                          <small className="text-uppercase">
-                            {report.caseRef}
-                          </small>
-                        </div>
-                      </div>
-
-                      <p className="text-small">{report.summary}</p>
-                    </div>
+            <SearchReportComp
+              loading={loading}
+              onSearch={(data) => {
+                getReports({ variables: { search: data } });
+              }}
+            />
+            <Fragment>
+              <div className="reports-tab mt-4">
+                <ul className="nav nav-tabs">
+                  {tabList.map((tab, i) => (
+                    <li className="nav-item" key={i}>
+                      <a
+                        className={`nav-link c-hand ${
+                          activeTab === tab ? "active" : ""
+                        }`}
+                        onClick={() => handleSwitch(tab)}
+                        // onClick={() => console.log(tab)}
+                      >
+                        {tab}
+                      </a>
+                    </li>
                   ))}
-                </div>
-              </Fragment>
-            )}
+                </ul>
+              </div>
+
+              <div className="reports-map">
+                {reports?.map((report, i) => (
+                  <ItemView key={i} report={report} />
+                ))}
+              </div>
+            </Fragment>
           </div>
         </div>
       </Wrapper>
@@ -134,3 +125,43 @@ const Wrapper = styled.div`
 export default ReportsListPage;
 
 const tabList = ["All", SUPREME_COURT, APPEAL_COURT];
+
+ReportsListPage.getInitialProps = async (
+  ctx: NextPageContext
+): Promise<{ allReports: IReport[] | null }> => {
+  const apollo = initializeApollo(null, ctx);
+  try {
+    const { data } = await apollo.query({
+      query: GET_REPORTS,
+      variables: { limit: 5 },
+    });
+    const reports: IReport[] = data?.getReports;
+
+    return {
+      allReports: reports,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      allReports: null,
+    };
+  }
+};
+
+const ItemView = ({ report }: { report: IReport }) => {
+  return (
+    <div className="wrapper my-3 ">
+      <div className="wrapper-header">
+        <Link href={`/reports/${report.slug}`}>
+          <h6 className="mt-3 mb-0 c-hand hover-primary">{report.title}</h6>
+        </Link>
+        <div className="small font-italic d-flex justify-content-between mb-3">
+          <small className="text-uppercase">{report.court}</small>
+          <small className="text-uppercase">{report.caseRef}</small>
+        </div>
+      </div>
+
+      <p className="text-small">{report.summary.slice(0, 300).concat("...")}</p>
+    </div>
+  );
+};

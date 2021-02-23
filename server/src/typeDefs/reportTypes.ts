@@ -39,16 +39,17 @@ export const ReportTypes = gql`
     summary: String
     year: String
     date: Date
-
     vol: String
     body: String
   }
   extend type Query {
     # Report
-    getReports: [Report]
+    getReports(search: String, limit: Int, skip: Int): [Report]
     getLimitedReports(skip: Int, limit: Int): [Report]
     getReport(slug: String): Report
-    getMyReports(skip: Int, limit: Int): [Report]
+    getMyReports(skip: Int, limit: Int, search: String): [Report]
+    getReportCount: Int
+
     # RepComment
     getRepComments: [RepComment]
     getRepCommentsByReport(report: ID): [RepComment]

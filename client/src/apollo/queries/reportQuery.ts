@@ -29,6 +29,7 @@ export const GET_REPORTS_QUERY = gql`
       vol
       caseRef
       slug
+      body
     }
   }
 `;

@@ -1,7 +1,7 @@
 import mongoose, { Model } from "mongoose";
 import slug from "mongoose-slug-generator";
 const Schema = mongoose.Schema;
-import { IReport, IReportComment } from "../types/Report.type";
+import { IReport, IReportComment } from "helpers/types/Report.type";
 
 const ReportSchema = new Schema(
   {
@@ -23,11 +23,10 @@ const ReportSchema = new Schema(
   },
   {
     timestamps: true,
-    autoIndex: false,
   }
 );
 
-ReportSchema.index({ "$**": "text" });
+ReportSchema.index({ title: "text", caseRef: "text", vol: "text" });
 ReportSchema.plugin(slug);
 
 const RepCommentSchema = new Schema({

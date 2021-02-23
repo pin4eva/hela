@@ -1,0 +1,15 @@
+{
+  "name": "helpers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Peter Akaliro",
+  "license": "MIT",
+  "private": false,
+  "typings": "index.d.ts",
+  "scripts": {
+    "build": "tsc index.ts -d"
+  },
+  "dependencies": {
+    "mongoose": "^5.11.17"
+  }
+}

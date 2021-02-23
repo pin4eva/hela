@@ -6,16 +6,16 @@ import AddReportsComp from "./AddReports";
 import ReportTableComp from "./ReportTable";
 import UpdateReportsComp from "./UpdateReport";
 
-const AdminReportComp = () => {
+const AdminReportComp = (): JSX.Element => {
   const [view, setView] = useState("main");
   const [reports, setReports] = useRecoilState<any[]>(ReportsAtom);
   const [slug, setSlug] = useState("");
 
-  const handleAddReport = (data) => {
+  const handleAddReport = (data: any) => {
     setReports([...reports, data]);
   };
 
-  const handleUpdate = (slug) => {
+  const handleUpdate = (slug: string) => {
     setView("update");
     setSlug(slug);
   };

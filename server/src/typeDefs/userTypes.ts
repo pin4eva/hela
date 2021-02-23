@@ -49,6 +49,7 @@ export const UserType = gql`
     checkEmail(email: String): User
     validateUsername(username: String): Boolean
     validateEmail(email: String): Boolean
+    uploadImage(image: String): User
   }
 
   input SignupInput {
